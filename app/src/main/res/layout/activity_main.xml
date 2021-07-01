@@ -36,6 +36,32 @@
                 android:layout_height="wrap_content"
                 android:typeface="monospace" />
         </ScrollView>
+
+
+
+        <RadioGroup
+            android:id="@+id/radioGroup1"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:orientation="horizontal"
+            android:layout_gravity="center">
+
+            <RadioButton
+                android:id="@+id/ascii_radio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="ASCII" />
+            <RadioButton
+                android:id="@+id/hex_radio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="HEX" />
+
+
+        </RadioGroup>
+
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

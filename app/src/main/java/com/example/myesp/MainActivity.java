@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +42,11 @@ public class MainActivity extends AppCompatActivity {
     private TextView consoleView;
     private ProgressBar progressBar;
     private EditText editText;
+    private RadioGroup radioGroup;
+    private RadioButton ascii_btn;
+    private RadioButton hex_btn;
+
+    private int FLAG = 0;
 
     UsbSerialPort port;
 
@@ -68,8 +75,11 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onNewData(final byte[] data) {
                     //TODO 新的数据
-
-                    runOnUiThread(()->{output(new String(data));});
+                    if(FLAG == 0){
+                        runOnUiThread(()->{output(new String(data));});
+                    }else{
+                        runOnUiThread(()->{output((toHexString1(data)));});
+                    }
                 }
             };
 
@@ -94,8 +104,15 @@ public class MainActivity extends AppCompatActivity {
         consoleView = findViewById(R.id.consoleText);
         progressBar = findViewById(R.id.progressBar);
         editText = findViewById(R.id.send_Text);
+        radioGroup = findViewById(R.id.radioGroup1);
+        ascii_btn = findViewById(R.id.ascii_radio);
+        hex_btn = findViewById(R.id.hex_radio);
 
         progressBar.setVisibility(View.INVISIBLE);
+
+        radioGroup.setOnCheckedChangeListener((group, checkedId) -> getOutputMode(checkedId));
+
+
 
         connectButton.setOnClickListener(v->{
             // Find all available drivers from attached devices.
@@ -144,16 +161,6 @@ public class MainActivity extends AppCompatActivity {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-//            byte buffer[] = new byte[16];
-//            int numBytesRead = 0;
-//            try {
-//                numBytesRead = port.read(buffer, 1000);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//          //  Log.d("TAG", "Read " + numBytesRead + " bytes.");
-//            Toast.makeText(this, ""+numBytesRead, Toast.LENGTH_SHORT).show();
-
         });
 
         closeButton.setOnClickListener(v->{
@@ -177,8 +184,38 @@ public class MainActivity extends AppCompatActivity {
         consoleView.append("> " + content + "\n");
     }
 
+    private void getOutputMode(int buttonId){
+        switch (buttonId){
+            case R.id.ascii_radio:
+                if(ascii_btn.isChecked()){
+                    FLAG = 0;
+                    Toast.makeText(this, "ASCII格式！", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            case R.id.hex_radio:
+                if(hex_btn.isChecked()){
+                    FLAG = 1;
+                    Toast.makeText(this, "HEX格式！", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
+    }
+    public static String toHexString1(byte[] b){
+        StringBuffer buffer = new StringBuffer();
+        for (int i = 0; i < b.length; ++i){
+            buffer.append(toHexString1(b[i]));
+        }
+        return buffer.toString();
+    }
 
-
+    public static String toHexString1(byte b){
+        String s = Integer.toHexString(b & 0xFF);
+        if (s.length() == 1){
+            return "0" + s;
+        }else{
+            return s;
+        }
+    }
 
 
 }
