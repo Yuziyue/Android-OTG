@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="16dp"
+    android:paddingLeft="16dp"
+    android:paddingRight="16dp"
+    android:paddingTop="16dp"
+    tools:context=".MainActivity">
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:padding="6dp"
+        style="@android:style/Widget.Holo.ProgressBar.Horizontal"
+        android:indeterminate="true" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@id/progressBar">
+        <ScrollView
+            android:id="@+id/demoScroller"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="8">
+
+            <TextView
+                android:id="@+id/consoleText"
+                android:textIsSelectable="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:typeface="monospace" />
+        </ScrollView>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_weight="1">
+        <Button
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="Open"
+            android:id="@+id/connectButton"
+            android:layout_weight="1" />
+        <Button
+            android:layout_marginLeft="16dp"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="close"
+            android:id="@+id/closeButton"
+            android:layout_weight="1"
+            />
+        <Button
+            android:layout_marginLeft="16dp"
+            android:layout_width="60dp"
+            android:layout_height="wrap_content"
+            android:text="clear"
+            android:id="@+id/clearButton"
+            android:layout_weight="1"
+            />
+    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_weight="1">
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/send_Text"
+                android:layout_weight="4"
+                android:hint="Send content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true" />
+
+            <Button
+                android:layout_width="95dp"
+                android:layout_height="wrap_content"
+                android:text="Send"
+                android:id="@+id/sendButton"
+                android:layout_weight="1"
+                android:layout_alignParentBottom="true"
+                android:layout_alignRight="@+id/demoScroller"
+                android:layout_alignEnd="@+id/demoScroller" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
