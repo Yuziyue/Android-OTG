@@ -46,15 +46,14 @@ public class MainActivity extends AppCompatActivity {
     private RadioButton ascii_btn;
     private RadioButton hex_btn;
 
-    private int FLAG = 0;
+    private int FLAG = 0;       //Judge Hex or ASCII
 
     UsbSerialPort port;
 
+    short b[] = new short[40000];
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
     private SerialInputOutputManager mSerialIoManager;
-
-
 
     private static String[] PERMISSIONS_STORAGE = {
             Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -63,22 +62,25 @@ public class MainActivity extends AppCompatActivity {
     //请求状态码
     private static int REQUEST_PERMISSION_CODE = 1;
 
-
-
     private final  SerialInputOutputManager.Listener mListener =
             new SerialInputOutputManager.Listener() {
                 @Override
                 public void onRunError(Exception e) {
                     Log.d("TAG", "Runner stopped.");
                 }
-
                 @Override
                 public void onNewData(final byte[] data) {
                     //TODO 新的数据
                     if(FLAG == 0){
-                        runOnUiThread(()->{output(new String(data));});
+                        runOnUiThread(()->{
+                            //ASCII
+                            output(new String(data));
+                        });
                     }else{
-                        runOnUiThread(()->{output((toHexString1(data)));});
+                        runOnUiThread(()->{
+                            //Hex
+                            output((toHexString1(data)));
+                        });
                     }
                 }
             };
@@ -87,15 +89,12 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-
         //Request Permissions
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this, PERMISSIONS_STORAGE, REQUEST_PERMISSION_CODE);
             }
         }
-
 
         sendButton = findViewById(R.id.sendButton);
         connectButton = findViewById(R.id.connectButton);
@@ -112,8 +111,7 @@ public class MainActivity extends AppCompatActivity {
 
         radioGroup.setOnCheckedChangeListener((group, checkedId) -> getOutputMode(checkedId));
 
-
-
+        //Connect Port
         connectButton.setOnClickListener(v->{
             // Find all available drivers from attached devices.
             UsbManager manager = (UsbManager) getSystemService(Context.USB_SERVICE);
@@ -127,10 +125,10 @@ public class MainActivity extends AppCompatActivity {
             UsbDeviceConnection connection = manager.openDevice(driver.getDevice());
             if (connection == null) {
                 // add UsbManager.requestPermission(driver.getDevice(), ..) handling here
+                //这里提前在res/xml/device_filter.xml中配置 需提前知道硬件设备的vid和pid
                 Toast.makeText(this, "Permission Error", Toast.LENGTH_SHORT).show();
                 return;
             }
-
             port = driver.getPorts().get(0); // Most devices have just one port (port 0)
             try {
                 port.open(connection);
@@ -138,23 +136,21 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
             try {
+                //Setting
                 port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
             if(port.isOpen()){
                 progressBar.setVisibility(View.VISIBLE);
                 output("Set port Success!");
-
                 mSerialIoManager = new SerialInputOutputManager(port, mListener);//添加监听
                 mSerialIoManager.start();
             }
         });
-
+        //Send message
         sendButton.setOnClickListener(v->{
             String strSend = editText.getText().toString()+'\n';
-//            String strSend = "hello\n";
             try {
                 port.write(strSend.getBytes(),1000);
                 Toast.makeText(this, "Write Successful", Toast.LENGTH_SHORT).show();
@@ -162,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         });
-
+        //Close port
         closeButton.setOnClickListener(v->{
             try {
                 port.close();
@@ -174,7 +170,7 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.INVISIBLE);
             }
         });
-
+        //Clear output
         clearButton.setOnClickListener(v->{
             consoleView.setText("");
         });
@@ -189,17 +185,18 @@ public class MainActivity extends AppCompatActivity {
             case R.id.ascii_radio:
                 if(ascii_btn.isChecked()){
                     FLAG = 0;
-                    Toast.makeText(this, "ASCII格式！", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this, "ASCII格式！", Toast.LENGTH_SHORT).show();
                 }
                 break;
             case R.id.hex_radio:
                 if(hex_btn.isChecked()){
                     FLAG = 1;
-                    Toast.makeText(this, "HEX格式！", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this, "HEX格式！", Toast.LENGTH_SHORT).show();
                 }
                 break;
         }
     }
+    //转化为Hex格式输出
     public static String toHexString1(byte[] b){
         StringBuffer buffer = new StringBuffer();
         for (int i = 0; i < b.length; ++i){
@@ -207,7 +204,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return buffer.toString();
     }
-
     public static String toHexString1(byte b){
         String s = Integer.toHexString(b & 0xFF);
         if (s.length() == 1){
@@ -216,7 +212,19 @@ public class MainActivity extends AppCompatActivity {
             return s;
         }
     }
-
+    //转化成12bits
+    public void GetDec(byte[] a){
+        b = new short[40000];
+        int i = 0,k=0;
+        int n = a.length;
+        while (i < n-1)
+        {
+            b[k++] = (short)(((a[i] << 4)&0x00000ff0) | ((a[i + 1] >> 4)&0x0000000f));
+            i++;
+            b[k++] = (short) (((a[i] << 8)&0x00000f00 )| ((a[i + 1])&0x000000ff ));
+            i += 2;
+        }
+    }
 
 }
 
